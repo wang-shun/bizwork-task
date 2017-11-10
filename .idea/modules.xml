@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/bizwork-task.iml" filepath="$PROJECT_DIR$/bizwork-task.iml" />
+      <module fileurl="file://$PROJECT_DIR$/task-api/bizwork-task-api.iml" filepath="$PROJECT_DIR$/task-api/bizwork-task-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/task-api-common/task-api-common.iml" filepath="$PROJECT_DIR$/task-api-common/task-api-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/task-api-constant/task-api-constant.iml" filepath="$PROJECT_DIR$/task-api-constant/task-api-constant.iml" />
+      <module fileurl="file://$PROJECT_DIR$/task-api-core/task-api-core.iml" filepath="$PROJECT_DIR$/task-api-core/task-api-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/task-api-impl/task-api-impl.iml" filepath="$PROJECT_DIR$/task-api-impl/task-api-impl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/task-api-teleport/task-api-teleport.iml" filepath="$PROJECT_DIR$/task-api-teleport/task-api-teleport.iml" />
+      <module fileurl="file://$PROJECT_DIR$/task-api-web/task-api-web.iml" filepath="$PROJECT_DIR$/task-api-web/task-api-web.iml" />
+    </modules>
+  </component>
+</project>

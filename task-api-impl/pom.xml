@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>com.sogou.bizwork</groupId>
+	    <artifactId>bizwork-task</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>task-api-impl</artifactId>
+	<packaging>jar</packaging>
+	<version>${task-api.version}</version>
+	<name>task-api-impl</name>
+
+	<dependencies>	
+		<dependency>
+			<groupId>com.sogou.bizwork</groupId>
+			<artifactId>bizwork-task-api</artifactId>
+			<version>${task-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sogou.bizwork</groupId>
+			<artifactId>task-api-core</artifactId>
+			<version>${task-api.version}</version>
+		</dependency>		
+	</dependencies> 
+</project>

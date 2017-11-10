@@ -1,0 +1,131 @@
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>com.sogou.bizwork</groupId>
+	    <artifactId>bizwork-task</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>task-api-web</artifactId>
+	<packaging>war</packaging>
+	<version>${task-api.version}</version>
+	<name>task-api-web</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.sogou.bizwork</groupId>
+			<artifactId>bizwork-task-api</artifactId>
+			<version>${task-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sogou.bizwork</groupId>
+			<artifactId>task-api-impl</artifactId>
+			<version>${task-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sogou.bizservicetree</groupId>
+			<artifactId>bizservicetree-api</artifactId>
+			<version>1.0.4-SNAPSHOT</version>
+		</dependency>		
+	</dependencies>
+
+	<build>
+		<finalName>bizwork-task-${task-api.version}</finalName>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/resources/base</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources/${package.environment}</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<webResources>
+						<resource>
+							<!-- this is relative to the pom.xml directory -->
+							<directory>${basedir}/src/main/resources/${package.environment}</directory>
+							<targetPath>WEB-INF/classes</targetPath>
+							<filtering>true</filtering>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy todir="${basedir}/../output">
+									<fileset dir="${basedir}/target" includes="*.war" />
+								</copy>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>product</id>
+			<properties>
+				<package.environment>product</package.environment>
+			</properties>
+			<build>
+				<resources>
+					<resource>
+						<directory>${basedir}/src/main/resources</directory>
+						<filtering>false</filtering>
+						<excludes>
+							<exclude>dev/**</exclude>
+							<exclude>qa/**</exclude>
+						</excludes>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<package.environment>dev</package.environment>
+			</properties>
+		</profile>
+		<profile>
+			<id>qa</id>
+			<properties>
+				<package.environment>qa</package.environment>
+			</properties>
+		</profile>
+	</profiles>
+
+</project>

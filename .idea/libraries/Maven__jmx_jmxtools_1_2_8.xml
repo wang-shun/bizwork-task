@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: jmx:jmxtools:1.2_8">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxtools/1.2_8/jmxtools-1.2_8.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxtools/1.2_8/jmxtools-1.2_8-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxtools/1.2_8/jmxtools-1.2_8-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

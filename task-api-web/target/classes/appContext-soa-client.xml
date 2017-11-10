@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:teleport="http://teleport.sogou.com/schema/teleport"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+		http://teleport.sogou.com/schema/teleport 
+		http://teleport.sogou.com/schema/teleport/teleport.xsd ">
+
+	<!-- bizwork soa -->
+	<bean id="bizworkMessageApiService"
+		class="com.sogou.bizdev.teleport.consumer.factorybean.thrift.ThriftHttpClusterProxyFactoryBean">
+		<property name="appId" value="bizwork" />
+		<property name="serviceInterface"
+			value="com.sogou.bizwork.api.message.service.BizworkMessageTService$Iface" />
+		<property name="timeout" value="20000" />
+		<property name="loadBalance" value="roundrobin" />
+		<property name="failTolerance" value="failover" />
+		<property name="retry" value="3" />
+		<property name="checkTime" value="30" />
+	</bean>
+	<bean id="xiaoPMessageTService"
+		class="com.sogou.bizdev.teleport.consumer.factorybean.thrift.ThriftHttpClusterProxyFactoryBean">
+		<property name="appId" value="bizwork" />
+		<property name="serviceInterface"
+			value="com.sogou.bizwork.api.xiaop.message.service.XiaoPMessageTService$Iface" />
+		<property name="timeout" value="20000" />
+		<property name="loadBalance" value="roundrobin" />
+		<property name="failTolerance" value="failover" />
+		<property name="retry" value="3" />
+		<property name="checkTime" value="30" />
+	</bean>
+	<bean id="processTService"
+		class="com.sogou.bizdev.teleport.consumer.factorybean.thrift.ThriftHttpClusterProxyFactoryBean">
+		<property name="appId" value="bizflow" />
+		<property name="serviceInterface"
+			value="com.sogou.adm.bizdev.bizflowapi.thrift.iface.process.ProcessTService$Iface" />
+		<property name="timeout" value="20000" />
+		<property name="loadBalance" value="roundrobin" />
+		<property name="failTolerance" value="failover" />
+		<property name="retry" value="3" />
+		<property name="checkTime" value="30" />
+	</bean>
+
+
+<!--	
+	<bean id="abstractBizservicetreeAPIServiceProxyBean"
+		class="com.sogou.bizdev.teleport.consumer.factorybean.thrift.ThriftHttpClusterProxyFactoryBean"
+		abstract="true" >
+		<property name="appId" value="bizservicetree-api" />
+		<property name="timeout" value="60000" />
+		<property name="loadBalance" value="roundrobin" />
+		<property name="failTolerance" value="failover" />
+		<property name="retry" value="3" />
+		<property name="checkTime" value="30" />
+		<property name="apiToken" value="bizpms:ad3bb823"/>
+	</bean>
+	
+	<bean id="serviceInstanceManagerTService"
+		parent="abstractBizservicetreeAPIServiceProxyBean"
+		class="com.sogou.bizwork.task.api.core.bizservicetree.BizserviceThriftFactoryBean"
+		lazy-init="true">
+		<property name="appId" value="bizservicetree-api" />
+		<property name="serviceInterface"
+			value="com.sogou.bizservicetree.api.service.ServiceInstanceManagerTService$Iface" />
+	</bean>
+	
+	 bizservicetree soa -->
+	 
+	 <bean id="abstractBizServiceProxyBean" class="com.sogou.bizwork.task.api.core.bizservicetree.BizserviceThriftFactoryBean" abstract="true">
+		<property name="appId" value="bizservicetree-api" />
+		<property name="timeout" value="60000"/>
+		<property name="loadBalance" value="roundrobin" />
+		<property name="failTolerance" value="failover" />
+		<property name="retry" value="3" />
+		<property name="checkTime" value="30" />
+		<property name="apiToken" value="bizpms:ad3bb823" />
+	</bean>
+	
+	<bean id="serviceInstanceManagerTService" parent="abstractBizServiceProxyBean">
+		<property name="serviceInterface"
+				  value="com.sogou.bizservicetree.api.service.ServiceInstanceManagerTService$Iface" />
+	</bean> 
+	
+	
+	
+	<!-- bizflow soa -->
+	<bean id="abstractBizflowAPIServiceProxyBean"
+		class="com.sogou.bizdev.teleport.consumer.factorybean.thrift.ThriftHttpClusterProxyFactoryBean"
+		abstract="true">
+		<property name="appId" value="bizflow" />
+		<property name="timeout" value="60000" />
+		<property name="loadBalance" value="roundrobin" />
+		<property name="failTolerance" value="failover" />
+		<property name="retry" value="3" />
+		<property name="checkTime" value="30" />
+	</bean>
+	<bean id="processInfoTService" parent="abstractBizflowAPIServiceProxyBean">
+		<property name="serviceInterface"
+			value="com.sogou.adm.bizdev.bizflowapi.thrift.iface.process.ProcessInfoTService$Iface" />
+	</bean>
+
+	<bean id="taskTService" parent="abstractBizflowAPIServiceProxyBean">
+		<property name="serviceInterface"
+			value="com.sogou.adm.bizdev.bizflowapi.thrift.iface.task.TaskTService$Iface" />
+	</bean>
+</beans>
+

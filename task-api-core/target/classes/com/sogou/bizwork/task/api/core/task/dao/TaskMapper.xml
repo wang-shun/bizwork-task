@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.task.dao.TaskMapper">
+
+	<resultMap id="BriefMsg"
+		type="com.sogou.bizwork.api.message.BriefTypeMessage">
+		<result column="mes_type_id" property="mesTypeId" />
+		<result column="num" property="num" />
+		<result column="employee_id" property="employeeId" />
+	</resultMap>
+	<select id="getChargeBriefTypeMessages" parameterType="java.lang.Long"
+		resultMap="BriefMsg">
+		SELECT x.charge_user, count(*) num, 5 mes_type_id FROM
+		(
+		SELECT a.id t_id, a.create_user, a.charge_user, a.start_time,
+		a.end_time, a.task_name, a.description,
+		a.attachment, a.`status`, a.create_time, a.change_time, b.follow_user ,b.`type`,
+		temp.*,mr.last_open_time
+		FROM t_task a
+		LEFT JOIN
+		(SELECT tg.`task_id`,g.`id` tag_id,g.`tag_name`,g.`tag_color`
+		FROM t_tag g
+		JOIN t_task_tag tg ON g.`id`=tg.`tag_id` AND g.`user_id`= #{employeeId}
+		AND g.`status` != -1 AND tg.`status`=1
+		)temp ON temp.`task_id`=a.`id`
+		LEFT JOIN t_task_follow b ON a.id = b.task_id AND b.`status` != -1
+		LEFT JOIN `t_user_message_read` mr ON mr.`task_id` = a.`id` AND
+		mr.`user_id`=#{employeeId}
+		WHERE a.charge_user = #{employeeId} AND a.`status` = 0
+		GROUP BY t_id
+		) x
+		GROUP BY x.charge_user
+		;
+	</select>
+	<select id="getChargeBriefTypeMessagesById" parameterType="java.lang.Long"
+		resultMap="BriefMsg">
+		SELECT DISTINCT IFNULL(charge_user,0) employee_id, count(*)
+		num, 5 mes_type_id
+		from t_task t WHERE t.charge_user in
+		(SELECT charge_user FROM t_task WHERE id=#{taskId}
+		AND `status`=0)
+		;
+	</select>
+	<select id="getAllChargeBriefTypeMessages" resultMap="BriefMsg">
+		SELECT
+		x.charge_user employee_id, count(*) num, 5 mes_type_id FROM
+		(
+		SELECT a.id t_id, a.create_user, a.charge_user, a.start_time, a.end_time,
+		a.task_name, a.description,
+		a.attachment, a.`status`, a.create_time, a.change_time, b.follow_user ,b.`type`,
+		temp.*,mr.last_open_time
+		FROM t_task a
+		LEFT JOIN
+		(SELECT tg.`task_id`,g.`id` tag_id,g.`tag_name`,g.`tag_color`
+		FROM t_tag g
+		JOIN t_task_tag tg ON g.`id`=tg.`tag_id` AND g.`status` != -1 AND
+		tg.`status`=1
+		)temp ON temp.`task_id`=a.`id`
+		LEFT JOIN t_task_follow b ON a.id = b.task_id AND b.`status` != -1
+		LEFT JOIN `t_user_message_read` mr ON mr.`task_id` = a.`id`
+		WHERE a.`status` = 0
+		GROUP BY t_id
+		) x
+		GROUP BY x.charge_user
+		;
+	</select>
+
+	<resultMap type="com.sogou.bizwork.task.api.core.task.dto.TaskDTO"
+		id="taskResultMap">
+		<id column="t_id" property="id" />
+		<result column="create_user" property="createUser" />
+		<result column="charge_user" property="chargeUser" />
+		<result column="start_time" property="startTime" jdbcType="TIMESTAMP"
+			javaType="[Ljava.lang.String;" />
+		<result column="end_time" property="endTime" jdbcType="TIMESTAMP"
+			javaType="[Ljava.lang.String;" />
+		<result column="task_name" property="taskName" />
+		<result column="description" property="description" />
+		<result column="attachment" property="attachment" />
+		<result column="status" property="status" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP"
+			javaType="[Ljava.lang.String;" />
+		<result column="change_time" property="changeTime" jdbcType="TIMESTAMP"
+			javaType="[Ljava.lang.String;" />
+		<result column="last_open_time" property="lastOpenTime"
+			jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+		<result column="score_value" property="scoreValue" />
+		<result column="score_status" property="scoreStatus" />
+		<result column="score_id" property="scoreId" />
+		<result column="score_type_id" property="scoreTypeId" />
+		<result column="score_from" property="scoreFrom" />
+		<collection property="followUsers" resultMap="followUserMap" />
+		<collection property="tags" resultMap="tagResultMap" />
+	</resultMap>
+
+	<resultMap
+		type="com.sogou.bizwork.task.api.core.taskfollow.dto.TaskFollowDTO"
+		id="followUserMap">
+		<id column="task_id" property="taskId" />
+		<id column="follow_user" property="followUser" />
+		<id column="type" property="type" />
+	</resultMap>
+
+	<resultMap type="com.sogou.bizwork.task.api.core.tag.dto.TagDto"
+		id="tagResultMap">
+		<id column="tag_id" property="id" />
+		<result column="tag_name" property="name" />
+		<result column="tag_color" property="color" />
+	</resultMap>
+
+
+	<select id="queryDemo" parameterType="long" resultMap="taskResultMap">
+	SELECT a.id t_id, a.create_user, a.charge_user, a.start_time,
+		a.end_time, a.task_name, a.description,
+		a.attachment, a.`status`, a.create_time, a.change_time, b.task_id, b.follow_user
+		,b.`type`,
+		temp.*,mr.last_open_time
+		FROM t_task a
+		LEFT JOIN
+		(SELECT tg.`task_id`,g.`id` tag_id,g.`tag_name`,g.`tag_color`
+		FROM t_tag g
+		JOIN t_task_tag tg ON g.`id`=tg.`tag_id` AND g.`user_id`= #{userId} AND
+		g.`status` != -1 AND tg.`status`=1
+		)temp ON temp.`task_id`=a.`id`
+		LEFT JOIN t_task_follow b ON a.id = b.task_id AND b.`status` != -1
+		LEFT JOIN `t_user_message_read` mr ON mr.`task_id` = a.`id` AND
+		mr.`user_id`=#{userId}
+		WHERE a.charge_user = #{userId} AND a.`status` = -1 AND a.`task_name` =  '示例任务' AND a.`description` = '示例任务,请自行删除'
+	</select>
+	<select id="queryChargeTasks" parameterType="long" resultMap="taskResultMap">
+		SELECT a.id t_id, a.create_user, a.charge_user, a.start_time,
+		a.end_time, a.task_name, a.description,
+		a.attachment, a.`status`, a.create_time, a.change_time, b.task_id, b.follow_user
+		,b.`type`,
+		temp.*,mr.last_open_time
+		FROM t_task a
+		LEFT JOIN
+		(SELECT tg.`task_id`,g.`id` tag_id,g.`tag_name`,g.`tag_color`
+		FROM t_tag g
+		JOIN t_task_tag tg ON g.`id`=tg.`tag_id` AND g.`user_id`= #{userId} AND
+		g.`status` != -1 AND tg.`status`=1
+		)temp ON temp.`task_id`=a.`id`
+		LEFT JOIN t_task_follow b ON a.id = b.task_id AND b.`status` != -1
+		LEFT JOIN `t_user_message_read` mr ON mr.`task_id` = a.`id` AND
+		mr.`user_id`=#{userId}
+		WHERE a.charge_user = #{userId} AND a.`status` != -1
+	</select>
+
+	<select id="queryFollowTasks" parameterType="long" resultMap="taskResultMap">
+		SELECT a.id t_id, a.create_user, a.charge_user, a.start_time,
+		a.end_time, a.task_name, a.description,
+		a.attachment, a.`status`, a.create_time,
+		a.change_time,b.`task_id`,b.`follow_user`,b.`type`,temp.*,mr.last_open_time
+		FROM t_task a
+		LEFT JOIN
+		(SELECT tg.`task_id`,g.`id` tag_id,g.`tag_name`,g.`tag_color`
+		FROM t_tag g
+		JOIN t_task_tag tg ON g.`id`=tg.`tag_id` AND g.`user_id`= #{userId} AND
+		g.`status` != -1 AND tg.`status`=1
+		)temp ON temp.`task_id`=a.`id`
+		LEFT JOIN t_task_follow b
+		ON a.`id`=b.`task_id` AND a.`id` IN
+		(SELECT task_id FROM t_task_follow
+		WHERE (follow_user = #{userId} AND type=0
+		OR follow_user = #{groupId} AND type=1)
+		AND STATUS!=-1)
+		LEFT JOIN `t_user_message_read` mr ON mr.`task_id` = a.`id` AND
+		mr.`user_id`=#{userId}
+		WHERE a.`status`!=-1 AND b.`status`!=-1
+	</select>
+
+	<select id="queryTaskInfo" parameterType="long" resultMap="taskResultMap">
+		SELECT a.id t_id, a.create_user, a.charge_user, a.start_time,
+			a.end_time,
+			a.task_name, a.description, a.attachment, a.`status`, a.create_time,
+			a.change_time,
+			b.task_id, b.follow_user ,b.type, tsh.score_id, tsh.score_type_id,
+			tsh.score_from, tsh.score score_value,
+			tsh.`status` score_status
+		FROM t_task a LEFT OUTER JOIN t_task_follow b on a.id = b.task_id
+			and a.`status` != -1 and b.`status` != -1
+		LEFT JOIN t_score_his tsh ON tsh.score_id=a.score_id
+		WHERE a.id = #{taskId}
+	</select>
+
+	<insert id="addTask" useGeneratedKeys="true" keyProperty="id"
+		parameterType="com.sogou.bizwork.task.api.core.task.dto.TaskDTO">
+		insert into t_task
+		(`create_user`,`charge_user`,`start_time`,`end_time`,`task_name`,
+		<if test="description != null">
+			description,
+		</if>
+		<if test="attachment != null">
+			`attachment`,
+		</if>
+		`status`,`create_time`,`change_time`, score_id)
+		values
+		(#{createUser},#{chargeUser},#{startTime},#{endTime},#{taskName},
+		<if test="description != null">
+			#{description},
+		</if>
+		<if test="attachment != null">
+			#{attachment},
+		</if>
+		#{status},now(),now(), #{scoreId})
+	</insert>
+
+	<update id="updateTask" parameterType="com.sogou.bizwork.task.api.core.task.dto.TaskDTO">
+		update t_task
+		<set>
+			<if test="startTime != null">start_time = #{startTime},</if>
+			<if test="endTime != null">end_time = #{endTime},</if>
+			<if test="taskName != null">task_name = #{taskName},</if>
+			<if test="description != null">description = #{description},</if>
+			<if test="attachment != null">attachment = #{attachment},</if>
+			change_time = now(), charge_user = #{chargeUser}, status = #{status}
+		</set>
+		where id = #{id}
+	</update>
+
+	<update id="updateChargeUser" parameterType="map">
+		update t_task
+		set charge_user = #{chargeUserId}, change_time = now()
+		where id = #{taskId} and status != -1
+	</update>
+
+
+	<select id="getChargeUser" parameterType="long" resultType="long">
+		SELECT DISTINCT charge_user FROM t_task
+	</select>
+
+
+	<!-- 下面的sql获取 已逾期的task。 我设想的已逾期是task的status还处在TODO 或者 doing 状态，但是endtime 
+		已经过了 已逾期 -->
+	<select id="getDoneJob" parameterType="long" resultMap="taskResultMap">
+         <![CDATA[
+            SELECT a.id t_id, a.create_user, a.charge_user, a.start_time, a.end_time, a.task_name, a.description, 
+                a.attachment, a.`status`, a.create_time, a.change_time
+                FROM t_task a 
+                WHERE a.charge_user = #{userId}  AND ((a.`status` = 0 AND to_days(end_time) < to_days(now())) OR (a.`status` = 1 AND to_days(end_time) < to_days(now()))) AND a.task_name!="示例任务" 
+        ]]>
+	</select>
+
+	<!-- 获取将进行的task，将进行的task指的是 status为TODO的或者为doing 的但是还有三天就到达endtime的任务 将到期 -->
+	<select id="getCommingJob" parameterType="long" resultMap="taskResultMap">
+        <![CDATA[
+            SELECT a.id t_id, a.create_user, a.charge_user, a.start_time, a.end_time, a.task_name, a.description, 
+                a.attachment, a.`status`, a.create_time, a.change_time
+                FROM t_task a 
+                WHERE a.charge_user = #{userId}  AND (a.`status` = 0 OR a.`status` = 1) AND a.task_name!="示例任务" AND to_days(end_time)-to_days(now()) <=3 AND to_days(end_time)>=to_days(now())
+        ]]>
+	</select>
+
+	<!-- 获取status 为todo 的任务 未跟进 -->
+	<select id="getTodoJob" parameterType="long" resultMap="taskResultMap">
+        <![CDATA[
+            SELECT a.id t_id, a.create_user, a.charge_user, a.start_time, a.end_time, a.task_name, a.description, 
+                a.attachment, a.`status`, a.create_time, a.change_time
+                FROM t_task a 
+                WHERE a.charge_user = #{userId}  AND a.`status` = 0 AND a.task_name!="示例任务" AND to_days(end_time) >= to_days(now())
+        ]]>
+	</select>
+
+	<select id="queryTaskByFullInfo" resultMap="taskResultMap">
+		SELECT a.id t_id FROM t_task a WHERE a.create_user = #{createUser} and
+		a.charge_user = #{chargeUser} and a.start_time = #{startTime} and
+		a.end_time = #{endTime} and a.task_name = #{taskName}
+	</select>
+
+	<update id="updateToDelByTaskIds" parameterType="java.lang.Long">
+		UPDATE t_task SET `status`=-1 WHERE id in
+		<foreach collection="list" item="taskId" open="(" separator=","
+			close=")">
+			#{taskId}
+		</foreach>
+	</update>
+	
+	<update id="updateScoreIdByTaskId" parameterType="map">
+		UPDATE t_task SET score_id = #{scoreId} where id=#{taskId}
+	</update>
+
+	<select id="getGroupInfoByGroupname" parameterType="java.lang.String"
+		resultType="com.sogou.bizwork.task.api.core.user.dto.GroupInfoDto">
+		SELECT groupname, dept_intro deptIntro, group_intro
+		groupIntro,
+		special_info specialInfo, tech_standard techStandard,
+		software_env softwareEnv
+		FROM group_info gi WHERE gi.groupname=#{groupname}
+	</select>
+
+	<select id="getAuditScoresByEmployeeid" parameterType="java.lang.Long"
+		resultType="com.sogou.bizwork.task.api.core.task.po.AuditScore">
+
+	</select>
+	<update id="updateScoreStatusByTaskId" parameterType="map">
+		UPDATE t_score_his tsh
+			JOIN t_task t ON t.score_id=tsh.score_id AND t.id=#{taskId}
+		SET tsh.`status` = #{scoreStatus}
+	</update>
+</mapper>

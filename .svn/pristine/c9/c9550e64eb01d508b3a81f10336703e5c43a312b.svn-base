@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.score.dao.ScoreDao">
+	<select id="getScoreHistory"
+		parameterType="com.sogou.bizwork.task.api.core.score.bo.ScoreFilter"
+		resultMap="scoreHistory">
+		select tsh.score_id, score, tsh.score_type_id, score_type,
+				IF(t.task_name IS NULL, reason, CONCAT('来自【',t.task_name,'】')) reason,
+				leader_id,
+				leader, accept_people, accept_people_id,
+				give_people,
+				give_people_id, tsh.update_time,groupname, tsh.`status`,
+		 CASE tsh.`status`
+		 WHEN 0 THEN '待领取'
+		 WHEN 1 THEN '已领取待确认'
+		 WHEN 2 THEN '已获得积分'
+		 WHEN 3 THEN '未获得积分' END
+		 `scoreStatus`
+				FROM t_score_his tsh
+				JOIN t_score_type tst
+				LEFT JOIN t_task t ON t.score_id=tsh.score_id
+				where tsh.status != -1 and (t.id IS NULL OR t.`status` != -1) AND
+				tst.score_type_id =
+				tsh.score_type_id
+		<if test="scoreTypeId != 0">
+			and tsh.score_type_id=#{scoreTypeId}
+		</if>
+		<if test="acceptPeople != null and acceptPeople != ''">
+			and tsh.accept_people like concat('%', #{acceptPeople}, '%')
+		</if>
+		<if test="givePeople != null and givePeople != ''">
+			and tsh.give_people like concat('%', #{givePeople}, '%')
+		</if>
+		<if test="group != null and group != ''">
+			and groupname like concat('%', #{group}, '%')
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND UNIX_TIMESTAMP(#{startTime}) <![CDATA[<= ]]>
+			UNIX_TIMESTAMP(tsh.create_time)
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND UNIX_TIMESTAMP(tsh.create_time) <![CDATA[<= ]]>
+			UNIX_TIMESTAMP(DATE_ADD(#{endTime},INTERVAL 1 day))
+		</if>
+		<if test="employeeIds != null">
+			AND (accept_people_id IN
+			<foreach collection="employeeIds" item="employeeId" open="("
+				close=")" separator=",">
+				#{employeeId}
+			</foreach>
+			or give_people_id IN
+			<foreach collection="employeeIds" item="employeeId" open="("
+				close=")" separator=",">
+				#{employeeId}
+			</foreach>
+			or leader_id IN
+			<foreach collection="employeeIds" item="employeeId" open="("
+				close=")" separator=",">
+				#{employeeId}
+			</foreach>
+			)
+		</if>
+		ORDER BY tsh.update_time DESC
+		limit #{startNo}, #{endNo}
+	</select>
+
+	<select id="getScoreHistoryCount"
+		parameterType="com.sogou.bizwork.task.api.core.score.bo.ScoreFilter"
+		resultType="java.lang.Integer">
+		select count(*)
+				FROM t_score_his tsh
+				JOIN t_score_type tst
+				LEFT JOIN t_task t ON t.score_id=tsh.score_id
+				where tsh.status != -1  and (t.id IS NULL OR t.`status` != -1) AND
+				tst.score_type_id =
+				tsh.score_type_id
+		<if test="scoreTypeId != 0">
+			and tsh.score_type_id=#{scoreTypeId}
+		</if>
+		<if test="acceptPeople != null and acceptPeople != ''">
+			and tsh.accept_people like concat('%', #{acceptPeople}, '%')
+		</if>
+		<if test="givePeople != null and givePeople != ''">
+			and tsh.give_people like concat('%', #{givePeople}, '%')
+		</if>
+		<if test="group != null and group != ''">
+			and groupname like concat('%', #{group}, '%')
+		</if>
+		<if test="leader != null and leader != ''">
+			and leader like concat('%', #{leader}, '%')
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND UNIX_TIMESTAMP(#{startTime}) <![CDATA[<= ]]>
+			UNIX_TIMESTAMP(tsh.create_time)
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND UNIX_TIMESTAMP(tsh.create_time) <![CDATA[<= ]]>
+			UNIX_TIMESTAMP(DATE_ADD(#{endTime},INTERVAL 1 day))
+		</if>
+	</select>
+
+	<select id="getScoreTypes" resultType="com.sogou.bizwork.task.api.core.score.bo.ScoreType">
+		select score_type_id
+		scoreTypeId, score_type scoreType from t_score_type
+	</select>
+
+	<insert id="addScore" useGeneratedKeys="true" keyProperty="scoreId"
+		parameterType="com.sogou.bizwork.task.api.core.score.bo.ScoreHistory">
+		insert into t_score_his(
+		<if test="scoreId gt 0">score_id, </if>
+		score,score_from, score_type_id, reason, leader, leader_id,
+		accept_people,
+		accept_people_id, give_people, give_people_id,
+		create_time,status, groupname)
+		VALUES (
+		<if test="scoreId gt 0">#{scoreId}, </if>
+		#{score},#{scoreFrom}, #{scoreTypeId}, #{reason}, #{leader},
+		#{leaderId}, #{acceptPeople},
+		#{acceptPeopleId}, #{givePeople},
+		#{givePeopleId}, now(), #{status}, #{group})
+	</insert>
+
+	<update id="updateScoreIdByScoreId" parameterType="map">
+		update
+		t_score_his set status=#{scoreStatus} where score_id=#{scoreId}
+	</update>
+
+	<delete id="deleteScoreByScoreId" parameterType="java.lang.Integer">
+		delete from
+		t_score_his where score_id=#{scoreId}
+	</delete>
+	<update id="setScoreToDelete" parameterType="java.lang.Long">
+		update t_score_his
+		tsh
+		JOIN t_task t ON t.score_id=tsh.score_id
+		SET tsh.`status` = 
+		IF (tsh.`status` != 2, -1, 2)
+		WHERE
+		t.id=#{taskId}
+	</update>
+	<select id="getScoreTaskByEmployeeId" parameterType="java.lang.Integer"
+		resultMap="ScoreTask">
+		(SELECT t.task_name,tsh.score, tst.score_type, '' reason,
+		tsh.give_people,t.change_time update_time, tsh.score_from
+		FROM t_task t
+		JOIN t_score_his tsh ON tsh.score_id=t.score_id
+		JOIN t_score_type tst
+		ON tst.score_type_id=tsh.score_type_id
+		WHERE t.score_id > 0 AND
+		tsh.`status`=2 AND
+		tsh.score_from=1 AND
+		tsh.accept_people_id=#{employeeId}
+		ORDER BY tsh.update_time DESC
+		LIMIT 0, 3)
+		UNION ALL
+		(SELECT '' task_name, tsh1.score, tst1.score_type,
+		tsh1.reason,
+		tsh1.give_people,tsh1.update_time, tsh1.score_from
+		FROM
+		t_score_his tsh1
+		JOIN t_score_type tst1 ON
+		tst1.score_type_id=tsh1.score_type_id
+		WHERE
+		tsh1.score_from=0 AND
+		tsh1.`status`=2 AND tsh1.accept_people_id=#{employeeId}
+		ORDER BY
+		tsh1.update_time DESC
+		LIMIT 0, 3
+		)
+		ORDER BY update_time DESC
+		LIMIT 0, 3
+	</select>
+
+	<select id="getScoreItemsByEmployeeId" resultType="com.sogou.bizwork.task.api.score.bo.ScoreItem"
+		parameterType="java.lang.Integer">
+		SELECT x.score_type scoreType, SUM(x.score) score FROM (
+		(SELECT tst.score_type, tst.score_type_id, SUM(tsh.score) score
+		FROM
+		t_task t
+		JOIN t_score_his tsh ON tsh.score_id=t.score_id
+		JOIN
+		t_score_type tst ON tst.score_type_id=tsh.score_type_id
+		WHERE
+		t.score_id > 0 AND tsh.`status`=2 AND tsh.score_from=1
+		AND
+		tsh.accept_people_id=#{employeeId}
+		GROUP BY tst.score_type_id)
+		UNION ALL
+		(SELECT tst1.score_type, tst1.score_type_id, SUM(tsh1.score) score
+		FROM t_score_his tsh1
+		JOIN t_score_type tst1 ON
+		tst1.score_type_id=tsh1.score_type_id
+		WHERE tsh1.score_from=0 AND
+		tsh1.`status`=2 AND
+		tsh1.accept_people_id=#{employeeId}
+		GROUP BY
+		tst1.score_type_id
+		)
+		) x
+		GROUP BY x.score_type_id
+	</select>
+
+	<select id="getScoreAndPeoples"
+		resultType="com.sogou.bizwork.task.api.core.score.bo.ScoreAndPeople">
+		select tsh.accept_people acceptPeople, SUM(score) score
+		FROM t_score_his tsh
+		WHERE tsh.`status` = 2
+		GROUP BY tsh.accept_people_id
+		ORDER BY score DESC
+		LIMIT 0,10
+	</select>
+
+	<select id="getScoreDetail"
+		resultType="com.sogou.bizwork.task.api.core.score.bo.ScoreDetail" parameterType="java.lang.String">
+		SELECT tsh.update_time dateTime,
+			tsh.score, IF(t.task_name IS NULL, reason, CONCAT('来自【',t.task_name,'】')) reason
+		FROM t_score_his tsh
+		LEFT JOIN t_task t ON t.score_id=tsh.score_id
+			WHERE tsh.accept_people=#{chineseName} AND tsh.`status`=2
+		order by tsh.update_time DESC
+	</select>
+
+	<select id="getScoreList" resultType="com.sogou.bizwork.task.api.core.score.bo.ScoreListBo">
+		SELECT * FROM(
+			SELECT SUM(x.score) totalScore, x.acceptPeople, x.reason, x.score, x.updateTime FROM (
+				SELECT accept_people acceptPeople, tsh.accept_people_id,
+					IF(t.task_name IS NULL,tsh.reason,CONCAT('来自【',t.task_name,'】')) reason, tsh.score,
+					tsh.update_time updateTime
+					FROM t_score_his tsh
+					LEFT JOIN t_task t ON t.score_id=tsh.score_id
+					WHERE tsh.`status` = 2
+				ORDER BY tsh.update_time DESC
+			) x
+				GROUP BY x.accept_people_id
+		  LIMIT 0, 10
+		) y
+		ORDER BY y.totalScore DESC
+	</select>
+	
+	<select id="getScoreByScoreId" parameterType="java.lang.Integer" resultMap="scoreHistory">
+		SELECT * FROM t_score_his tsh
+			JOIN t_score_type tst ON tst.score_type_id=tsh.score_type_id
+		WHERE tsh.score_id=#{scoreId}
+	</select>
+
+
+	<resultMap id="ScoreTask"
+		type="com.sogou.bizwork.task.api.core.score.bo.ScoreTask">
+		<result column="task_name" property="taskName" />
+		<result column="score" property="score" />
+		<result column="score_type" property="scoreType" />
+		<result column="reason" property="reason" />
+		<result column="give_people" property="givePeople" />
+		<result column="update_time" property="updateTime" />
+		<result column="score_from" property="scoreFrom" />
+	</resultMap>
+
+	<resultMap type="com.sogou.bizwork.task.api.core.score.bo.ScoreHistory"
+		id="scoreHistory">
+		<id column="score_id" property="scoreId" />
+		<result column="score" property="score" />
+		<result column="score_type_id" property="scoreTypeId" />
+		<result column="score_type" property="scoreType" />
+		<result column="reason" property="reason" />
+		<result column="groupname" property="group" />
+		<result column="leader" property="leader" />
+		<result column="leader_id" property="leaderId" />
+		<result column="give_people_id" property="givePeopleId" />
+		<result column="accept_people_id" property="acceptPeopleId" />
+		<result column="give_people" property="givePeople" />
+		<result column="accept_people" property="acceptPeople" />
+		<result column="update_time" property="time" />
+		<result column="status" property="status" />
+		<result column="scoreStatus" property="scoreStatus" />
+	</resultMap>
+</mapper>

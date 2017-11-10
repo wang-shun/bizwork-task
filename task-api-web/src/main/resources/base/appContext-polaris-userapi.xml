@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	<bean id="parentTService" class="com.sogou.bizdev.polaris.client.v2.ThriftProxyFactoryBean" abstract="true">
+ 		<property name="connect_Timeout" value="3000" />
+ 		<property name="read_Timeout" value="300000" />
+		<property name="intercepters">
+			<list>
+				<ref bean="authenticationIntercepter"/>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="authenticationIntercepter" class="com.sogou.bizdev.polaris.client.v2.AuthenticationIntercepter">
+		<property name="apiKey" value="biztech"></property>
+		<property name="apiSecret" value="biztech"></property>
+	</bean>
+	
+	<bean id="StarryTService" parent="parentTService">
+		<property name="serviceName" value="Account Level Service(using Exporter)"></property>
+		<property name="serviceInterface" value="com.sogou.biztech.starry.api.StarryTService"></property>
+		<property name="serviceUrl">
+			<value>${starry.serviceUrl}</value>
+		</property>
+	</bean>
+
+	
+</beans>

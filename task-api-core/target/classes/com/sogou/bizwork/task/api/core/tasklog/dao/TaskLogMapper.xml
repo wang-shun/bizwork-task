@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.tasklog.dao.TaskLogMapper">
+	<resultMap type="com.sogou.bizwork.task.api.core.tasklog.dto.TaskLogDTO" id="taskLogResultMap">
+		<id column="id" property="id" />
+		<result column="task_id" property="taskId" />
+		<result column="create_user" property="createUser" />
+		<result column="charge_user" property="chargeUser" />
+		<result column="start_time" property="startTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+		<result column="end_time" property="endTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+		<result column="description" property="description" />
+		<result column="attachment" property="attachment" />
+		<result column="status" property="status" />
+		<result column="operate_type" property="operateType" />
+		<result column="operate_user" property="operateUser" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+		<result column="task_follows" property="taskFollows" />
+	</resultMap>
+	
+	<insert id="addTaskLog" parameterType="com.sogou.bizwork.task.api.core.tasklog.dto.TaskLogDTO">
+    	insert into t_task_log (`task_id`,`create_user`, `charge_user`, `start_time`, `end_time`,
+    	  <if test="description != null" >
+	        `description`, 
+	      </if>
+	      <if test="attachment != null" >
+	        `attachment`, 
+	      </if>
+    	`status`, `operate_user`,`operate_type`, `create_time`, `task_follows`)
+    	values (#{taskId},#{createUser},#{chargeUser},#{startTime},#{endTime},
+    	 <if test="description != null" >
+	        #{description},
+	      </if>
+	      <if test="attachment != null" >
+	        #{attachment},
+	      </if>
+    	#{status},#{operateUser},#{operateType},now(),#{taskFollows})
+    </insert>
+	
+	<select id="getTaskLogsByTaskId" parameterType="map" resultMap="taskLogResultMap">
+		select id, task_id, create_user, charge_user, start_time, end_time, 
+		description, attachment, status, operate_type, operate_user, create_time, task_follows 
+		from t_task_log 
+		where task_id = #{taskId} 
+		order by `create_time` asc 
+	</select>
+	
+	<delete id="deleteTaskLogsByTaskId" parameterType="long">
+		delete from t_task_log
+		where task_id = #{taskId}
+	</delete>
+</mapper>

@@ -1,0 +1,1 @@
+quorumString=mizar.zkserver1:2181,mizar.zkserver2:2181,mizar.zkserver3:2181

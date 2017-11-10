@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.medal.dao.MedalDao">
+	<select id="getMedalTypes" resultType="com.sogou.bizwork.task.api.core.medal.bo.MedalType">
+		SELECT medal_type_id
+		medalTypeId, medal_type medalType FROM t_medal_type
+	</select>
+
+	<insert id="addMedal"
+		parameterType="com.sogou.bizwork.task.api.core.medal.bo.MedalHistory">
+		INSERT INTO t_medal_his(medal_type_id, accept_people_id,
+		accept_people, give_people_id, give_people
+		<if test="reason != null and reason != ''">, reason</if>
+		, create_time)
+		VALUES (#{medalTypeId}, #{acceptPeopleId},
+		#{acceptPeople}, #{givePeopleId}, #{givePeople}
+		<if test="reason != null and reason != ''">, #{reason}</if>
+		, now())
+	</insert>
+
+	<select id="getMedalInfoByEmployeeId" resultType="com.sogou.bizwork.task.api.medal.bo.MedalInfo"
+		parameterType="java.lang.Integer">
+		SELECT tmt.medal_type medalType, tmt.medal_description
+			medalDescription,
+			tmt.medal_img_url medalImgUrl
+		FROM t_medal_his tmh
+			JOIN t_medal_type tmt ON tmt.medal_type_id=tmh.medal_type_id
+		WHERE tmh.accept_people_id=#{employeeId}
+	</select>
+</mapper>

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="task-api-web:war">
+    <output-path>$PROJECT_DIR$/task-api-web/target</output-path>
+    <root id="archive" name="bizwork-task-1.0.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="task-api-web:war exploded" />
+    </root>
+  </artifact>
+</component>

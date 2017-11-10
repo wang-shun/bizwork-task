@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-2.5.xsd 
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+	
+	<bean id="starry_datasource" class="com.mchange.v2.c3p0.ComboPooledDataSource"  destroy-method="close">
+		<property name="driverClass" value="${datasource.starry.driverClassName}" />
+		<property name="jdbcUrl" value="${datasource.starry.url}" />
+		<property name="user" value="${datasource.starry.userName}" />
+		<property name="password" value="${datasource.starry.password}" />
+		<property name="minPoolSize" value="${datasource.starry.minPoolSize}" />
+		<property name="maxPoolSize" value="${datasource.starry.maxPoolSize}" />
+		<property name="maxIdleTime" value="${datasource.starry.maxIdleTime}" />
+		<property name="initialPoolSize" value="${datasource.starry.initialPoolSize}" />
+		<property name="checkoutTimeout" value="${datasource.starry.checkoutTimeout}" />
+	</bean>
+	
+    <bean id="sqlSessionFactory_starry" class="org.mybatis.spring.SqlSessionFactoryBean">  
+        <property name="dataSource" ref="starry_datasource" />  
+        <!-- 自动扫描mapping.xml文件 -->  
+        <property name="mapperLocations" value="classpath*:com/sogou/bizwork/task/api/core/user/dao/*.xml"></property>  
+    </bean>
+
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value=" com.sogou.bizwork.task.api.core.user.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory_starry"></property>
+    </bean>
+    
+     <bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">  
+       <property name="mapperInterface" value="com.sogou.bizwork.task.api.core.user.dao.UserMapper" />  
+       <property name="sqlSessionFactory" ref="sqlSessionFactory_starry" />  
+    </bean>  
+
+</beans>

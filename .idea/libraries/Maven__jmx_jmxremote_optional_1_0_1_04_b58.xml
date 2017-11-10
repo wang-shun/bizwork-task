@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: jmx:jmxremote_optional:1_0_1_04-b58">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxremote_optional/1_0_1_04-b58/jmxremote_optional-1_0_1_04-b58.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxremote_optional/1_0_1_04-b58/jmxremote_optional-1_0_1_04-b58-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxremote_optional/1_0_1_04-b58/jmxremote_optional-1_0_1_04-b58-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

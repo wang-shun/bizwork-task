@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.user.dao.UserMapper">
+	<select id="getEmployeeIdsByGroupIds" parameterType="java.lang.Long"
+		resultType="java.lang.Long">
+		SELECT DISTINCT employee_id FROM `user`
+		WHERE groupid in
+		(
+		SELECT
+		DISTINCT id FROM grouptable g WHERE
+		<foreach collection="list" item="groupId" separator="or">
+			g.groupauth LIKE CONCAT('%#',#{groupId},'#%')
+		</foreach>
+		)
+	</select>
+	<select id="getUnLeaveUserNames" resultType="java.lang.String">
+		SELECT username FROM
+		`user` WHERE state = 1
+	</select>
+	<select id="getGroupLeaderCount" parameterType="java.lang.Long"
+		resultType="java.lang.Integer">
+		SELECT count(1) FROM `grouptable` g
+		join user u on
+		u.email=g.leaderemail
+		where u.employee_id=#{employeeId}
+	</select>
+	<select id="getUserByUserName" resultMap="userResultMap"
+		parameterType="java.lang.String">
+		SELECT * from `user` WHERE username=#{userName}
+	</select>
+	<select id="getLeaderIdByEmployeeId" parameterType="java.lang.Long"
+		resultType="java.lang.Long">
+		<!-- SELECT CASE (SELECT count(*) FROM grouptable gt WHERE gt.leaderemail=( 
+			SELECT us.email FROM `user` us WHERE us.employee_id=#{employeeId})) WHEN 
+			0 THEN (SELECT uu.employee_id FROM `user` uu WHERE uu.email=( SELECT g.leaderemail 
+			FROM `user` u JOIN grouptable g ON g.Id=u.groupid WHERE u.employee_id=#{employeeId})) 
+			ELSE (SELECT us.employee_id FROM `user` us WHERE us.email=( SELECT pgt.leaderemail 
+			FROM `user` u JOIN grouptable gt ON gt.Id=u.groupid JOIN grouptable pgt ON 
+			pgt.Id=gt.parentgroupid WHERE u.employee_id=#{employeeId} )) END ; -->
+		select u.leader_id from user u where u.employee_id=#{employeeId}
+	</select>
+	<select id="getGrouppathLikeChineseName" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		SELECT DISTINCT g.groupauth FROM `user` u
+		JOIN grouptable g on g.leaderemail=u.email
+		WHERE u.chinesename LIKE
+		CONCAT('%',#{chineseName},'%') or
+		u.email like concat('%',
+		#{chineseName}, '%')
+	</select>
+
+	<select id="getEmployeeIdsByGrouppaths" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select DISTINCT u.employee_id from `user` u
+		join grouptable g ON g.Id=u.groupid
+		where
+			<foreach collection="list" item="grouppath" separator="or">
+				g.groupauth LIKE CONCAT('%',#{grouppath},'%')
+			</foreach>
+	</select>
+
+	<resultMap type="com.sogou.bizwork.task.api.core.user.dto.UserDTO"
+		id="userResultMap">
+		<id column="id" property="id" />
+		<id column="employee_id" property="employeeId" />
+		<result column="username" property="userName" />
+		<result column="email" property="email" />
+		<result column="chinesename" property="chineseName" />
+		<result column="groupName" property="groupName" />
+		<result column="groupId" property="groupId" />
+		<result column="birthday" property="birthday" />
+		<result column="telephone" property="telephone" />
+		<result column="mobile" property="mobile" />
+		<result column="role" property="role" />
+		<result column="level" property="level" />
+		<result column="job" property="job" />
+		<result column="leader_id" property="leaderId" />
+	</resultMap>
+
+	<resultMap type="com.sogou.bizwork.task.api.core.user.dto.GroupDTO"
+		id="groupResultMap">
+		<id property="id" column="id" />
+		<result property="groupName" column="groupname" />
+		<result property="chineseName" column="chinesename" />
+		<result property="parentGroup" column="parentgroup" />
+		<result property="leader" column="leader" />
+		<result property="groupEmail" column="groupemail" />
+		<result property="groupFunction" column="groupfunction" />
+		<result property="groupState" column="groupstate" />
+		<result property="groupType" column="grouptype" />
+		<result property="leaderEmail" column="leaderemail" />
+	</resultMap>
+
+	<select id="getAllUsers" resultMap="userResultMap">
+		select * from user where
+		state!=2
+	</select>
+
+	<select id="getUsersByIds" resultMap="userResultMap"
+		parameterType="java.lang.Integer">
+		select * from user where employee_id IN
+		<foreach collection="list" item="id" open="(" close=")"
+			separator=",">
+			#{id}
+		</foreach>
+	</select>
+	<select id="getUserNamesByEmployeeIds" resultType="java.lang.String"
+		parameterType="java.lang.Long">
+		select DISTINCT username from user where employee_id IN
+		<foreach collection="list" item="id" open="(" close=")"
+			separator=",">
+			#{id}
+		</foreach>
+	</select>
+
+	<select id="getUserById" resultMap="userResultMap"
+		parameterType="int">
+		select * from user where employee_id = #{employeeId}
+	</select>
+
+	<select id="getUserByEmployeeId" resultMap="userResultMap"
+		parameterType="int">
+		select * from user where employee_id = #{employeeId}
+	</select>
+
+	<select id="getAllGroups" resultMap="groupResultMap">
+		select * from grouptable
+		where groupstate!=2
+	</select>
+
+	<select id="getGroupById" resultMap="groupResultMap"
+		parameterType="int">
+		select * from grouptable where id = #{id}
+	</select>
+
+	<select id="getChineseNameAndGroup"
+		resultType="com.sogou.bizwork.task.api.core.user.po.ChineseNameAndGroup"
+		parameterType="java.util.List">
+		SELECT u.employee_id employeeId, u.chinesename ChineseName,
+		u.groupname groupName
+		FROM `user` u WHERE u.employee_id in
+		<foreach collection="list" item="employeeId" open="(" close=")"
+			separator=",">
+			#{employeeId}
+		</foreach>
+	</select>
+
+	<select id="getUserAndLeader"
+		resultType="com.sogou.bizwork.task.api.core.activiti.po.UserAndLeader">
+		SELECT u.chinesename name, u.employee_id employeeId,
+		lu.chinesename leader from `user` u
+		LEFT JOIN `user` lu ON
+		lu.employee_id = u.leader_id
+		WHERE
+		ISNULL(u.active_time)
+	</select>
+
+	<select id="updateActiveTime"
+		parameterType="com.sogou.bizwork.task.api.core.activiti.po.UserAndLeader">
+		<foreach collection="list" item="item" separator=";">
+			update `user`
+			set active_time=now() where employee_id=#{item.employeeId}
+		</foreach>
+	</select>
+
+	<select id="getUserInfoByEmployeeId" resultType="com.sogou.bizwork.task.api.core.user.po.UserInfo"
+		parameterType="java.lang.Long">
+		SELECT u.employee_id employeeId, u.chinesename userName,
+		u.email, u.chinesename chineseName,u.groupname `group`,
+		u.groupname
+		groupName, u.groupid
+		groupId,
+		u.birthday, u.telephone, u.mobile, u.role,
+		u.state, u.`level`,
+		u.job, u.leader_id leaderId,
+		u.groupname,
+		u.hc_description hcdescription,
+		u.ip_address ipAddress, l.employee_id
+		leaderId,
+		l.chinesename leaderName, l.username leaderUserName,
+		groupauth, groupemail
+		FROM
+		`user` u
+		JOIN `user` l ON
+		u.leader_id=l.employee_id
+		LEFT JOIN grouptable
+		g on u.groupid=g.Id
+		WHERE
+		u.employee_id=#{employeeId}
+	</select>
+	<select id="getGrouppathByEmployeeId" resultType="java.lang.String" parameterType="java.lang.Integer">
+		SELECT g.groupauth FROM `user` u
+			JOIN grouptable g ON g.leaderemail=u.email
+		WHERE u.employee_id=#{employeeId}
+	</select>
+	<select id="getSubordinates" parameterType="list"
+		resultType="com.sogou.bizwork.task.api.core.user.po.Subordinate">
+		SELECT distinct u.employee_id
+		employeeId, u.chinesename chineseName
+		FROM `user` u
+		WHERE u.groupid IN
+		(SELECT Id FROM grouptable g2 WHERE
+		<foreach collection="list" item="groupauth" open="(" close=")" separator="or">
+			g2.groupauth LIKE
+			CONCAT('%',#{groupauth},'%')
+		</foreach>
+		)
+	</select>
+</mapper>

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: sogou.polaris.server:sogou.polaris.server.core.v2:2.1.1-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/sogou/polaris/server/sogou.polaris.server.core.v2/2.1.1-SNAPSHOT/sogou.polaris.server.core.v2-2.1.1-20160426.074853-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/sogou/polaris/server/sogou.polaris.server.core.v2/2.1.1-SNAPSHOT/sogou.polaris.server.core.v2-2.1.1-20160426.074853-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/sogou/polaris/server/sogou.polaris.server.core.v2/2.1.1-SNAPSHOT/sogou.polaris.server.core.v2-2.1.1-20160426.074853-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

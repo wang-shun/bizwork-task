@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: jmx:jdmkrt:5_1-b34.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jdmkrt/5_1-b34.2/jdmkrt-5_1-b34.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jdmkrt/5_1-b34.2/jdmkrt-5_1-b34.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jdmkrt/5_1-b34.2/jdmkrt-5_1-b34.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.scheduled.dao.ScheduledTaskDao">
+	<insert id="addScheduledTask" parameterType="com.sogou.bizwork.task.api.core.scheduled.bo.ScheduledTaskBo">
+		INSERT INTO t_task_scheduled(task, task_id, create_user, period_frequency,period_specific, period_valid,create_time,update_time)
+		   VALUES (#{task},#{taskId},#{createUser},#{periodFrequency},#{periodSpecific},#{periodValid}, now(),#{updateTime})
+	</insert>
+	
+	<select id="getScheduledTasksByIds" parameterType="java.lang.Integer" resultMap="ScheduledTaskBo">
+		SELECT * FROM t_task_scheduled tts WHERE tts.id in 
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		and status=0
+	</select>
+	
+	<select id="getValidTasks" resultMap="ScheduledTaskBo">
+		SELECT * FROM t_task_scheduled tts WHERE tts.`status` = 0
+	</select>
+	
+	<resultMap type="com.sogou.bizwork.task.api.core.scheduled.bo.ScheduledTaskBo" id="ScheduledTaskBo">
+		<result column="id" property="id"/>
+		<result column="task_id" property="taskId"/>
+		<result column="task" property="task"/>
+		<result column="create_user" property="createUser"/>
+		<result column="period_frequency" property="periodFrequency"/>
+		<result column="period_specific" property="periodSpecific"/>
+		<result column="period_valid" property="periodValid"/>
+		<result column="create_time" property="createTime"/>
+		<result column="update_time" property="updateTime"/>
+		<result column="status" property="status"/>
+	</resultMap>
+	
+	<update id="updateToDelByTaskIds"  parameterType="java.lang.Long">
+		UPDATE t_task_scheduled SET `status`=-1 WHERE task_id in
+    	<foreach collection="list" item="taskId" open="(" separator="," close=")">
+    		#{taskId}
+    	</foreach>
+	</update>
+	
+	<delete id="deleTaskByTaskId" parameterType="java.lang.Long">
+		DELETE FROM t_task_scheduled WHERE task_id=#{taskId}
+	</delete>
+	
+	<select id="getTaskByTaskId" resultMap="ScheduledTaskBo" parameterType="java.lang.Long">
+		select * from t_task_scheduled where task_id = #{taskId} and status=0
+	</select>
+	
+	<update id="updateTaskIds" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			update t_task_scheduled 
+			<set>
+				task_id=#{item.newTaskId}
+			</set>
+			WHERE task_id=#{item.taskId}
+		</foreach>
+	</update>
+	<update id="updateDate" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			update t_task_scheduled 
+			<set>
+				update_time=#{item.updateTime}
+			</set>
+			WHERE task_id=#{item.taskId}
+		</foreach>
+	</update>
+</mapper>

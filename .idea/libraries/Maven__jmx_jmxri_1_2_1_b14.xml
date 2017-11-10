@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: jmx:jmxri:1.2.1-b14">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxri/1.2.1-b14/jmxri-1.2.1-b14.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxri/1.2.1-b14/jmxri-1.2.1-b14-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/jmx/jmxri/1.2.1-b14/jmxri-1.2.1-b14-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

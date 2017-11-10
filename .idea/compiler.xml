@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="bizwork-task-api" />
+        <module name="task-api-common" />
+        <module name="task-api-constant" />
+        <module name="task-api-core" />
+        <module name="task-api-impl" />
+        <module name="task-api-teleport" />
+        <module name="task-api-web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="bizwork-task" target="1.6" />
+      <module name="bizwork-task-api" target="1.6" />
+      <module name="task-api-common" target="1.6" />
+      <module name="task-api-constant" target="1.6" />
+      <module name="task-api-core" target="1.6" />
+      <module name="task-api-impl" target="1.6" />
+      <module name="task-api-teleport" target="1.6" />
+      <module name="task-api-web" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

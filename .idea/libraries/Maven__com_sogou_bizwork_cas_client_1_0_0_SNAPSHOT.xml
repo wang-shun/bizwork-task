@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.sogou.bizwork:cas-client:1.0.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizwork/cas-client/1.0.0-SNAPSHOT/cas-client-1.0.0-20160817.061314-47.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizwork/cas-client/1.0.0-SNAPSHOT/cas-client-1.0.0-20160817.061314-47-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizwork/cas-client/1.0.0-SNAPSHOT/cas-client-1.0.0-20160817.061314-47-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,2 @@
+#quorumString=10.134.86.137:2181,10.152.111.141:2181
+quorumString=qa.zkserver1.sogou.com:2181,qa.zkserver2.sogou.com:2181,qa.zkserver3.sogou.com:2181

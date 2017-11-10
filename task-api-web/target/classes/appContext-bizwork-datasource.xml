@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:ds="http://www.sogou.com/schema/datasource"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.sogou.com/schema/datasource http://www.sogou.com/schema/datasource/datasource.xsd" 
+	default-autowire="byName">
+
+	
+	<!-- bizwork-task datasource -->
+	<bean id="defaultBizworkTaskDatasource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		abstract="true" destroy-method="close">
+		<property name="driverClass">
+			<value>${datasource.mysql.driverClassName}</value>
+		</property>
+		<property name="user">
+			<value>${datasource.bizwork.username}</value>
+		</property>
+		<property name="password">
+			<value>${datasource.bizwork.password}</value>
+		</property>
+		<property name="maxPoolSize">
+			<value>${datasource.bizwork.maxPoolSize}</value>
+		</property>
+		<property name="minPoolSize">
+			<value>${datasource.bizwork.minPoolSize}</value>
+		</property>
+		<property name="initialPoolSize">
+			<value>${datasource.bizwork.initialPoolSize}</value>
+		</property>
+		<property name="idleConnectionTestPeriod">
+			<value>${datasource.bizwork.idleConnectionTestPeriod}</value>
+		</property>
+		<property name="maxIdleTime">
+			<value>${datasource.bizwork.maxIdleTime}</value>
+		</property>
+		<property name="checkoutTimeout">
+			<value>${datasource.bizwork.checkoutTimeout}</value>
+		</property>  
+	</bean>
+
+
+	<ds:datasource id="bizworkMasterslaveDataSource" datasource-prototype="defaultBizworkTaskDatasource">
+			<ds:group name="masterslave">
+				<ds:master jdbcUrl="${datasource.bizwork.master}"/>
+ 				<ds:slave  jdbcUrl="${datasource.bizwork.slave}"/>
+ 			</ds:group>
+ 			
+ 			<ds:pingStatement value="select 1 from dual" />
+ 			<ds:loadbalance loadBalanceStrategy="weightedRoundRobin" /> 
+
+	 </ds:datasource>
+</beans>

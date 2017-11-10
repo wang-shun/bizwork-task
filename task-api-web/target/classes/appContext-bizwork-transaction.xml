@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-2.5.xsd 
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+	
+	<bean id="sqlSessionFactory_bizwork_task" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<property name="dataSource" ref="bizworkMasterslaveDataSource" />
+		<property name="mapperLocations"  value="classpath*:com/sogou/bizwork/task/api/core/*/dao/*.xml" />
+	</bean>
+	
+	<bean id="mapperScannerConfigurer_bizwork_task" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory_bizwork_task"></property>
+		<property name="basePackage"  value="com.sogou.bizwork.task.api.core.*.dao" />
+	</bean>
+	
+	<bean id="transactionManager_bizwork_task"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="bizworkMasterslaveDataSource" />
+	</bean>
+	
+	<!-- 预处理器 -->
+	<bean id="dynamicDsInterceptor_bizwork_task" class="com.sogou.bizdev.compass.core.preprocessor.RoutingInterceptor">
+		<property name="dataSourceId" value="bizworkMasterslaveDataSource"></property>
+		<property name="masterSlaveAttributes">
+			<props>
+				<prop key="create*">MASTER</prop>
+				<prop key="del*">MASTER</prop>
+				<prop key="update*">MASTER</prop>
+				<prop key="insert*">MASTER</prop>
+				<prop key="add*">MASTER</prop>
+				<prop key="set*">MASTER</prop>
+				<prop key="save*">MASTER</prop>
+				<prop key="build*">MASTER</prop>
+				<prop key="write*">MASTER</prop>
+				<prop key="set*">MASTER</prop>
+				
+				<!-- 只读事务 -->
+				<prop key="*">SLAVE</prop>
+			</props>
+		</property>
+	</bean>
+	<!--声明事物-->
+	<tx:advice id="txAdvice_bizwork_task" transaction-manager="transactionManager_bizwork_task"> 
+		<tx:attributes>  <!--切点中的要拦截的方法配置事物属性-->
+			<tx:method name="modify*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="update*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="cancel*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="add*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="del*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="set*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="save*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="commit*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="pause*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="insert*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="create*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="pass*" propagation="REQUIRED" rollback-for="Exception"/>
+			<tx:method name="*" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+    	<aop:pointcut id="masterSlavePointcut" expression="execution(public * com.sogou.bizwork.task.api.core.*.service.impl.*.*(..))"/> 
+        <aop:advisor pointcut-ref="masterSlavePointcut" advice-ref="dynamicDsInterceptor_bizwork_task" order="1"/>
+        <aop:advisor pointcut-ref="masterSlavePointcut" advice-ref="txAdvice_bizwork_task" order="2" />  <!--切入点和通知,切入点表示在哪切入,通知是要执行的-->
+	</aop:config>
+</beans>

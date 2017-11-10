@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.sogou.bizwork.task.api.core.activiti.dao.WorkflowDao">
+	<select id="getFlowTypes" resultType="com.sogou.bizwork.task.api.core.activiti.bo.FlowTypeRelation">
+		SELECT paft.id parentFlowId, paft.`name` parentFlowTypeName,
+		    aft.id flowTypeId, aft.name flowTypeName FROM act_flow_type aft
+			JOIN act_flow_type paft ON paft.id=aft.parent_type_id
+			WHERE aft.id != aft.parent_type_id
+		ORDER BY paft.id,aft.id
+	</select>
+	
+	<insert id="addActivitiInfo" parameterType="com.sogou.bizwork.task.api.core.activiti.bo.ActInfo">
+		INSERT INTO act_info (employee_id,business_key,flow_type_id,form_data,chinese_name, flow_name, message)
+		VALUES(#{employeeId},#{businessKey},#{flowTypeId},#{formData}, #{ChineseName}, #{flowName}, #{message});
+	</insert>
+	
+	<select id="getActivitiInfos" resultType="com.sogou.bizwork.task.api.core.activiti.bo.ActInfo" parameterType="java.util.List">
+		select id, employee_id employeeId, business_key businessKey, create_time createTime,
+			flow_type_id flowTypeId, chinese_name ChineseName, flow_name flowName, form_data formData, message
+		from act_info where business_key IN 
+		<foreach collection="list" item="businessKey" open="(" close=")" separator=",">
+			#{businessKey}
+		</foreach>
+	</select>
+	
+	<select id="updateFormdataByBusinessKey">
+		update act_info set form_data=#{formData},flow_name=#{flowName} where business_key=#{businessKey}
+	</select>
+	
+	<select id="getActivitiInfo" resultType="com.sogou.bizwork.task.api.core.activiti.bo.ActInfo" parameterType="java.lang.String">
+		select id, employee_id employeeId, business_key businessKey, create_time createTime,
+			flow_type_id flowTypeId, chinese_name ChineseName, flow_name flowName, form_data formData, message
+		from act_info where business_key=#{businessKey}
+	</select>
+	
+	<select id="getBusinessKeysByConditions" resultType="java.lang.String" parameterType="com.sogou.bizwork.task.api.core.activiti.vo.QueryConditionVo">
+		SELECT business_key FROM act_info ai WHERE 1=1 
+		<if test="employeeId != null">
+			AND ai.employee_id = #{employeeId}
+		</if>
+		<if test="flowTypeId != 0">
+			AND ai.flow_type_id = #{flowTypeId}
+		</if>
+		<if test="flowName != null">
+		    AND ai.flow_name like CONCAT('%',#{flowName},'%')
+		</if>
+		<if test="employee != null">
+			AND ai.chinese_name LIKE CONCAT('%',#{employee},'%')
+		</if>
+		<if test="startTimeBegin != null">
+			AND  UNIX_TIMESTAMP(#{startTimeBegin}) <![CDATA[<= ]]> UNIX_TIMESTAMP(ai.create_time)
+		</if>
+		<if test="startTimeEnd != null">
+			AND UNIX_TIMESTAMP(ai.create_time) <![CDATA[<= ]]>  UNIX_TIMESTAMP(DATE_ADD(#{startTimeEnd},INTERVAL 1 day)) 
+		</if>
+	</select>
+	<delete id="deleteWorkflowByBusinessKey" parameterType="java.lang.String">
+		DELETE FROM act_info WHERE act_info.business_key=#{businessKey}
+	</delete>
+	
+	<select id="getWorkFLowInitMaps" parameterType="java.lang.Integer" resultType="com.sogou.bizwork.task.api.core.activiti.bo.WorkflowInitMap">
+		SELECT business_key businessKey, param_key paramKey, param_value paramValue
+			FROM act_flow_init_map afi 
+			RIGHT JOIN act_flow_type aft ON afi.flow_type_id=aft.id
+		WHERE aft.id=#{flowTypeId}
+	</select>
+</mapper>

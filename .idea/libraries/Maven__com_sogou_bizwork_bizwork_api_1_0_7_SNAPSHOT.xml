@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.sogou.bizwork:bizwork-api:1.0.7-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizwork/bizwork-api/1.0.7-SNAPSHOT/bizwork-api-1.0.7-20170704.094245-4.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizwork/bizwork-api/1.0.7-SNAPSHOT/bizwork-api-1.0.7-20170704.094245-4-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizwork/bizwork-api/1.0.7-SNAPSHOT/bizwork-api-1.0.7-20170704.094245-4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

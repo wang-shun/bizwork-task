@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.sogou.bizservicetree:bizservicetree-api:1.0.3-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizservicetree/bizservicetree-api/1.0.3-SNAPSHOT/bizservicetree-api-1.0.3-20170413.121309-49.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizservicetree/bizservicetree-api/1.0.3-SNAPSHOT/bizservicetree-api-1.0.3-20170413.121309-49-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sogou/bizservicetree/bizservicetree-api/1.0.3-SNAPSHOT/bizservicetree-api-1.0.3-20170413.121309-49-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: sogou:emer-provider:3.17.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/sogou/emer-provider/3.17.0-SNAPSHOT/emer-provider-3.17.0-20170414.032257-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/sogou/emer-provider/3.17.0-SNAPSHOT/emer-provider-3.17.0-20170414.032257-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/sogou/emer-provider/3.17.0-SNAPSHOT/emer-provider-3.17.0-20170414.032257-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

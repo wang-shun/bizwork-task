@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.sogou.bizwork.task.api.core.bizservicetree.dao.ServiceTreeInfoDao">
+	<insert id="addServiceTreeInfo" parameterType="java.util.List">
+		INSERT INTO
+		service_tree_info(service_name,description,service_status,op_leader,op_group,
+		op_charger,qa_leader,qa_group,qa_charger,dev_leader,dev_group,dev_charger,is404,dept)
+		VALUES
+		<foreach collection="list" item="serviceTreeInfo" index="index"
+			separator=",">
+			(#{serviceTreeInfo.serviceName},#{serviceTreeInfo.description},
+			 #{serviceTreeInfo.serviceStatus},#{serviceTreeInfo.opLeader},#{serviceTreeInfo.opGroup},
+			 #{serviceTreeInfo.opCharger},#{serviceTreeInfo.qaLeader},#{serviceTreeInfo.qaGroup},
+			 #{serviceTreeInfo.qaCharger},#{serviceTreeInfo.devLeader},#{serviceTreeInfo.devGroup},
+			 #{serviceTreeInfo.devCharger},#{serviceTreeInfo.is404},#{serviceTreeInfo.dept})
+		</foreach>
+	</insert>
+	
+	<delete id="clearServiceTreeInfo">
+		delete from service_tree_info;
+		alter table service_tree_info AUTO_INCREMENT= 1;
+	</delete>
+	
+	<resultMap type="com.sogou.bizwork.task.api.core.bizservicetree.ServiceTreeInfo" id="ServiceTreeInfoMap">
+		<result column="service_name" property="serviceName"/>
+		<result column="description" property="description"/>
+		<result column="service_status" property="serviceStatus"/>
+		<result column="op_leader" property="opLeader"/>
+		<result column="op_group" property="opGroup"/>
+		<result column="op_charger" property="opCharger"/>
+		<result column="dev_leader" property="devLeader"/>
+		<result column="dev_group" property="devGroup"/>
+		<result column="dev_charger" property="devCharger"/>
+		<result column="qa_leader" property="qaLeader"/>
+		<result column="qa_group" property="qaGroup"/>
+		<result column="qa_charger" property="qaCharger"/>
+		<result column="is404" property="is404"/>
+		<result column="dept" property="dept"/>
+	</resultMap>
+	
+	<select id="getServiceTreeInfos" resultMap="ServiceTreeInfoMap">
+		select * from service_tree_info
+	</select>
+</mapper>

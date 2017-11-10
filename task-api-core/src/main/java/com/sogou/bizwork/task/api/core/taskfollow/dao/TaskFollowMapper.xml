@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.taskfollow.dao.TaskFollowMapper">
+
+	<insert id="addTaskFollows" parameterType="java.util.List">
+		insert into t_task_follow (`task_id`, `follow_user`, `status`, `create_time`, `change_time`,`type`)
+		values
+		<foreach collection="list" item="taskFollow" index="index" separator=",">
+    		(#{taskFollow.taskId}, #{taskFollow.followUser}, #{taskFollow.status}, now(), now(),#{taskFollow.type})
+    	</foreach>
+    </insert>
+    
+    <update id="updateTaskFollowsStatusDel" parameterType="long">
+    	update t_task_follow set status = -1 where task_id = #{taskId}
+    </update>
+    
+    <update id="updateFollowUser" parameterType="com.sogou.bizwork.task.api.core.taskfollow.dto.TaskFollowDTO">
+    	update t_task_follow set status = -1 
+    	where task_id = #{taskId} and follow_user=#{followUser} and type=#{type}
+    </update>
+    
+    <resultMap id="BriefMsg" type="com.sogou.bizwork.api.message.BriefTypeMessage">
+        <result column="mes_type_id" property="mesTypeId" />
+        <result column="num" property="num" />
+        <result column="employee_id" property="employeeId" />
+    </resultMap>
+    <select id="getAllFollwBriefMessages" resultMap="BriefMsg">
+         SELECT DISTINCT follow_user employee_id, count(*) num, 6 mes_type_id FROM t_task_follow tf
+				JOIN t_task t ON t.id=tf.task_id
+                WHERE tf.`status`=0 AND t.`status`=0
+        GROUP BY tf.follow_user
+        ;
+    </select>
+    <select id="getFollowBriefTypeMessages" parameterType="java.util.List" resultMap="BriefMsg">
+        SELECT DISTINCT 6 mes_type_id, count(*) num, tf.follow_user employee_id from t_task_follow tf
+                JOIN t_task t ON t.id=tf.task_id
+            WHERE tf.follow_user in
+            <foreach collection="list" item="employeeId" open="(" separator="," close=")">
+                #{employeeId}
+            </foreach>
+            AND tf.`status`=0 AND t.`status`=0 AND tf.type=0
+        GROUP BY follow_user
+        ;
+    </select>
+    <select id="getAllTaskFollows" resultMap="BriefMsg">
+        SELECT DISTINCT follow_user employee_id, count(*) num, 6 mes_type_id FROM t_task_follow tf
+            JOIN t_task t ON t.id=tf.task_id
+            WHERE tf.`status`=0 AND t.`status`=0
+        GROUP BY tf.follow_user
+        ;
+    </select>
+    <resultMap id="TaskFollow" type="com.sogou.bizwork.task.api.core.task.po.TaskFollow">
+       <result column="follow_user" property="followUser" />
+       <result column="type" property="type" />
+    </resultMap>   
+    <select id="getTaskFollowsById" parameterType="java.lang.Long" resultMap="TaskFollow" >
+		SELECT DISTINCT follow_user, type FROM t_task_follow tf
+            JOIN t_task t ON t.id=tf.task_id
+                WHERE tf.task_id=#{taskId} AND tf.`status`=0
+                AND t.`status`!=-1
+		ORDER BY type
+		;
+    </select>
+    
+  
+    <select id="getAllFollowers" resultType="com.sogou.bizwork.task.api.core.task.msg.po.MsgReceiver">
+	    SELECT DISTINCT follow_user id,type FROM t_task_follow tf
+	        JOIN t_task t ON t.id=tf.task_id
+	        WHERE tf.`status`=0 AND t.`status`=0
+	    ORDER BY type desc
+	    ;
+    </select>
+    
+    
+    <update id="updateToDelByTaskIds" parameterType="java.lang.Long">
+    	UPDATE t_task_follow set status = -1 WHERE id in
+    	<foreach collection="list" item="taskId" open="(" separator="," close=")">
+    		#{taskId}
+    	</foreach>
+    </update>
+</mapper>

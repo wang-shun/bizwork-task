@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sogou.bizwork.task.api.core.tag.dao.TagDao">
+	<resultMap type="com.sogou.bizwork.task.api.core.tag.dto.TagDto" id="tagResultMap">
+		<id column="id" property="id" />
+		<result column="task_id" property="taskId" />
+		<result column="user_id" property="userId" />
+		<result column="tag_name" property="name" />
+		<result column="tag_color" property="color" />
+		<result column="status" property="status" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+		<result column="change_time" property="changeTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+	</resultMap>
+	
+	<resultMap type="com.sogou.bizwork.task.api.core.tag.dto.TagOrderDto" id="tagOrderResultMap">
+		<id column="id" property="id" />
+		<result column="user_id" property="userId" />
+		<result column="type" property="type" />
+		<result column="tag_order" property="order" />
+		<result column="change_time" property="changeTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+	</resultMap>
+
+	<insert id="addTag" parameterType="com.sogou.bizwork.task.api.core.tag.dto.TagDto">
+		insert into t_tag (`user_id`, `tag_name`,`tag_color`, `status`, `create_time`, `change_time`) 
+	    values (#{userId}, #{name}, #{color}, 0, now(), now())
+	</insert>
+	<insert id="addTaskTag" parameterType="long">
+		insert into t_task_tag (`task_id`, `tag_id`, `status`, `create_time`, `change_time`) 
+	    values (#{taskId}, #{tagId}, 1, now(), now())
+	</insert>
+
+	<insert id="addTags" parameterType="java.util.List">
+		insert into t_tag (`task_id`, `user_id`, `tag_name`, `tag_color`, `status`, `create_time`, `change_time`) 
+		values 
+		<foreach collection="list" item="tagDto" index="index" separator=",">
+			(#{tagDto.taskId}, #{tagDto.userId}, #{tagDto.name}, #{tagDto.color}, #{tagDto.status}, now(), now()) 
+		</foreach>
+	</insert>
+	
+	<!-- 获取用户所有的标签 -->
+	<select id="getTags" parameterType="java.lang.Long" resultMap="tagResultMap">
+		select `id`, `user_id`, `tag_name`, `tag_color`, `status`, `create_time`, `change_time`
+		from t_tag 
+		where user_id=#{userId} and status != -1
+	</select>
+	
+	<select id="getTagsByTaskId" parameterType="map" resultType="long">
+		select `tag_id`
+		from t_task_tag 
+		where task_id = #{taskId} and status != 0
+	</select>
+	
+	<select id="getTagById" parameterType="map" resultMap="tagResultMap">
+		select `id`, `task_id`, `user_id`, `tag_name`, `tag_color`, `status`, `create_time`, `change_time` 
+		from t_tag 
+		where id=#{id} and status != -1 
+	</select>
+	
+	<!-- 获取指定用户指定任务的标签 -->
+	<select id="getTagsByTaskIdAndUserId" parameterType="map" resultMap="tagResultMap">
+		select a.`id`, b.`task_id`, a.`user_id`, a.`tag_name`, a.`tag_color`, b.`status`, b.`create_time`, b.`change_time` 
+		from t_tag a JOIN t_task_tag b
+		ON a.id = b.tag_id  and a.status != -1 and b.`status` != 0 
+		where b.task_id = #{taskId} and a.user_id = #{userId}
+	</select>
+	
+	<select id="getTagBytaskIdAndTagId"  parameterType="long" resultType="java.lang.Integer">
+		select count(*) from t_task_tag
+		where task_id = #{taskId} and tag_id = #{tagId} and status =1
+	</select>
+	
+	<select id="getTagByUserIdAndTagName" parameterType="map" resultMap="tagResultMap">
+		select `id`, `user_id`, `tag_name`, `tag_color`, `status`, `create_time`, `change_time` 
+		from t_tag 
+		where user_id = #{userId} and tag_name = #{tagName} and status != -1
+	</select>
+	
+	<update id="updateTaskTagStatusDel" parameterType="com.sogou.bizwork.task.api.core.tag.dto.TagDto">
+		update t_task_tag set status = 0, change_time = now() 
+		where task_id = #{taskId}
+	</update>
+	
+	<update id="deleteTag" parameterType="long">
+		update t_tag set status = -1, change_time = now() 
+		where id = #{tagId} and status != -1 
+	</update>
+	
+	<update id="deleteTagsByTaskIdAndTagId" parameterType="long">
+		update t_task_tag set status = 0, change_time = now() 
+		where task_id = #{taskId} and tag_id = #{tagId} and status != 0 
+	</update>
+	<select id="getTagIdCount" parameterType="long" resultType="java.lang.Integer">
+		select count(*) from t_task_tag
+		where tag_id = #{tagId} and status =1
+	</select>
+	
+	 <insert id="updateTagOrder" parameterType="com.sogou.bizwork.task.api.core.tag.dto.TagOrderDto">
+    	replace into t_tag_order (`user_id`, `type`,`tag_order`, `change_time`)
+    	values (#{userId}, #{type}, #{order},now())
+    </insert>
+    <select id="getTagOrder" parameterType="map" resultMap="tagOrderResultMap">
+		select `id`, `user_id`, `type`, `tag_order`, `change_time`
+		from t_tag_order 
+		where user_id=#{userId} and type=#{type}
+	</select>
+</mapper>

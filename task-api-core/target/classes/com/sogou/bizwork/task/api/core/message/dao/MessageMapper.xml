@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.sogou.bizwork.task.api.core.message.dao.MessageMapper">
+	
+	<resultMap type="com.sogou.bizwork.task.api.core.message.dto.MessageDTO" id="messageResultMap">
+		<id column="id" property="id" />
+		<result column="task_id" property="taskId" />
+		<result column="user_id" property="userId" />
+		<result column="content" property="content" />
+		<result column="status" property="status" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+		<result column="change_time" property="changeTime" jdbcType="TIMESTAMP" javaType="[Ljava.lang.String;" />
+	</resultMap>
+	
+	<insert id="addMessage" useGeneratedKeys="true" keyProperty="id" parameterType="com.sogou.bizwork.task.api.core.message.dto.MessageDTO">
+		insert into t_task_message (`task_id`, `user_id`,  
+		 `content`, `status`, `create_time`, `change_time`) 
+	    values (#{taskId}, #{userId}, #{content}, 1, now(), now())
+	</insert>
+	
+	<select id="getMessages" parameterType="map" resultMap="messageResultMap">
+		select `id`, `task_id`, `user_id`, `content`, `create_time`
+		from t_task_message 
+		where task_id=#{taskId} and status != 0
+		order by `create_time` DESC
+	</select>
+	
+    <resultMap id="BriefMsg" type="com.sogou.bizwork.api.message.BriefTypeMessage">
+        <result column="mes_type_id" property="mesTypeId" />
+        <result column="num" property="num" />
+        <result column="employee_id" property="employeeId" />
+    </resultMap>
+
+    <select id="getAllChargeBriefTypeMessages" resultMap="BriefMsg">
+		SELECT u.user_id employee_id, count(*) num, 7 mes_type_id FROM (
+		select * from 
+		(
+		select tmp2.task_id ,tmp2.user_id,tmp2.maxMsgTime,tmp2.user_type,tmp3.maxReadTime,tmp3.taskId,tmp3.userId from 
+		(
+		select tmp.task_id ,tmp.user_id,tmp.maxMsgTime,tmp.user_type from 
+		(
+		select m.task_id,max(m.create_time) maxMsgTime,t.charge_user user_id , 0 user_type from  t_task_message m
+		join t_task t on t.id= m.task_id
+		WHERE m.`status`=1 AND t.`status` != -1
+		group by m.task_id
+		union all
+		SELECT tf.task_id, tf.create_time maxMsgTime, tf.follow_user user_id, 1 user_type FROM t_task_follow tf
+		 WHERE tf.task_id in
+		 (
+		SELECT m.task_id FROM t_task_message m
+		JOIN t_task_follow f on f.task_id=m.task_id
+		WHERE tf.`status`=0 AND m.`status`=1
+		GROUP BY m.task_id
+		)
+		)tmp 
+		)tmp2
+		left join 
+		(select r.task_id taskId,r.user_id userId,max(r.last_open_time) maxReadTime from t_user_message_read r
+		group by r.task_id,r.user_id
+		)tmp3 on tmp3.taskId = tmp2.task_id and tmp2.user_id= tmp3.userId
+		)t 
+		WHERE (ISNULL(t.maxReadTime) OR t.maxMsgTime>t.maxReadTime) AND t.user_type=0
+		GROUP BY t.task_id,t.user_id, t.user_type
+		ORDER BY t.user_id,user_type
+		) u
+		GROUP BY u.user_id
+		;
+    </select>
+    <select id="getAllFollowBriefBypeMessages" resultMap="BriefMsg">
+		SELECT u.user_id employee_id, count(*) num, 8 mes_type_id FROM (
+		select * from 
+		(
+		select tmp2.task_id ,tmp2.user_id,tmp2.maxMsgTime,tmp2.user_type,tmp3.maxReadTime,tmp3.taskId,tmp3.userId from 
+		(
+		select tmp.task_id ,tmp.user_id,tmp.maxMsgTime,tmp.user_type from 
+		(
+		select m.task_id,max(m.create_time) maxMsgTime,t.charge_user user_id , 0 user_type from  t_task_message m
+		join t_task t on t.id= m.task_id
+		WHERE m.`status`=1 AND t.`status` != -1
+		group by m.task_id
+		union all
+		SELECT tf.task_id, tf.create_time maxMsgTime, tf.follow_user user_id, 1 user_type FROM t_task_follow tf
+		 WHERE tf.task_id in
+		 (
+		SELECT m.task_id FROM t_task_message m
+		JOIN t_task_follow f on f.task_id=m.task_id
+		WHERE tf.`status`=0 AND m.`status`=1
+		GROUP BY m.task_id
+		)
+		)tmp 
+		)tmp2
+		left join 
+		(select r.task_id taskId,r.user_id userId,max(r.last_open_time) maxReadTime from t_user_message_read r
+		group by r.task_id,r.user_id
+		)tmp3 on tmp3.taskId = tmp2.task_id and tmp2.user_id= tmp3.userId
+		)t 
+		WHERE (ISNULL(t.maxReadTime) OR t.maxMsgTime>t.maxReadTime) AND t.user_type=1
+		GROUP BY t.task_id,t.user_id, t.user_type
+		ORDER BY t.user_id,user_type
+		) u
+		GROUP BY u.user_id
+		;
+    </select>
+	<select id="getChargeBriefTypeMessages" parameterType="java.lang.Long" resultMap="BriefMsg">
+		SELECT #{employeeId} employee_id, COUNT(*) num, 7 mes_type_id FROM t_task_message tm
+		        JOIN t_task t ON t.id=tm.task_id
+		WHERE t.`status` != -1 AND tm.`status` =1
+		AND tm.task_id NOT IN 
+		        (SELECT tu.task_id FROM t_user_message_read tu
+		                JOIN t_task_message tm ON tm.user_id=tu.user_id
+		                    AND tm.task_id=tu.task_id)
+		AND t.charge_user=#{employeeId}
+		GROUP BY tm.task_id
+		;
+	</select>
+	   <select id="getFollowBriefTypeMessages" parameterType="java.lang.Long" resultMap="BriefMsg">
+        SELECT #{employeeId} employee_id, COUNT(*) num, 8 mes_type_id FROM t_task_message tm
+                JOIN t_task t ON t.id=tm.task_id
+        WHERE t.`status` != -1 AND tm.`status` =1
+        AND tm.task_id NOT IN 
+                (SELECT tu.task_id FROM t_user_message_read tu
+                        JOIN t_task_message tm ON tm.user_id=tu.user_id
+                            AND tm.task_id=tu.task_id)
+        AND t.charge_user != #{employeeId}
+        GROUP BY tm.task_id
+        ;
+    </select>
+        
+    <resultMap type="com.sogou.bizwork.task.api.core.task.msg.po.TaskIdAndMsgTime" id="TaskIdAndCreateTime">
+        <result column="task_id" property="taskId" />
+        <result column="maxMsgTime" property="maxMsgTime" />
+    </resultMap>
+    <select id="getTaskIdAndMsgTimes" resultMap="TaskIdAndCreateTime">
+		SELECT tf.task_id, max(m.create_time) maxMsgTime
+		FROM  t_task_message m
+		JOIN t_task_follow tf ON tf.task_id=m.task_id
+		JOIN t_task ttt ON ttt.id=m.task_id
+		WHERE tf.`status`=0 AND m.`status`=1
+		group by task_id
+    </select>
+    
+    <resultMap type="com.sogou.bizwork.task.api.core.task.msg.po.TaskIdAndOpenTime" id="TaskIdAndOpenTime">
+        <result column="task_user" property="taskAtUser" />
+        <result column="last_open_time" property="lastOpenTime" />
+    </resultMap>
+    <select id="getTaskIdAndOpenTime" resultMap="TaskIdAndOpenTime">
+        select CONCAT(r.task_id,'@',r.user_id) task_user, r.last_open_time from t_user_message_read r
+        where r.task_id in(
+             SELECT distinct tf.task_id
+                FROM  t_task_message m
+             JOIN t_task_follow tf ON tf.task_id=m.task_id
+               WHERE tf.`status`=0 AND m.`status`=1
+        )
+    </select>
+	
+	<resultMap type="com.sogou.bizwork.task.api.core.task.msg.po.TaskIdAndFollower" id="TaskIdAndFollower">
+	    <result column="task_id" property="taskId" />
+	    <result column="user_id" property="userId" />
+	    <result column="type" property="lastOpenTime" />
+    </resultMap>
+    <select id="getTaskIdAndFollowers" resultMap="TaskIdAndFollower">
+        select tf.task_id, tf.follow_user user_id, r.last_open_time FROM t_task_follow tf
+		LEFT JOIN t_user_message_read r ON tf.task_id=r.task_id
+		JOIN t_task ttt ON ttt.id=tf.task_id
+		where r.task_id in(
+				 SELECT distinct tf.task_id
+						FROM  t_task_message m
+				 JOIN t_task_follow tf ON tf.task_id=m.task_id
+					 WHERE tf.`status`=0 AND m.`status`=1
+		) AND tf.`status`=0;
+    </select>
+	
+	<select id="queryChargeMessages" parameterType="map" resultMap="messageResultMap">
+		SELECT tm.* FROM 
+			(SELECT a.id t_id, MAX(m.id) maxid ,MAX(m.create_time)
+    		FROM t_task a 
+    		JOIN `t_task_message` m ON m.`task_id` = a.`id`
+    		LEFT JOIN `t_user_message_read` mr ON mr.`task_id` = a.`id` AND mr.`user_id`=#{userId}
+    		WHERE a.charge_user = #{userId}  AND a.`status` != -1 
+    		GROUP BY a.`id`
+    		)tmp
+    		JOIN t_task_message tm ON tm.id = tmp.maxid
+	</select>
+	<select id="queryFollowMessages" parameterType="map" resultMap="messageResultMap">
+		SELECT tm.* FROM 
+			(SELECT a.id t_id, MAX(m.id) maxid ,MAX(m.create_time)
+    		FROM t_task a 
+    		LEFT JOIN t_task_follow b 
+			ON a.`id`=b.`task_id` AND a.`id` IN 
+			(SELECT task_id FROM t_task_follow WHERE follow_user = #{userId} AND  STATUS!=-1) 
+    		JOIN `t_task_message` m ON m.`task_id` = a.`id`
+    		LEFT JOIN `t_user_message_read` mr ON mr.`task_id` = a.`id` AND mr.`user_id`=#{userId}
+    		WHERE a.`status` != -1 AND b.`status`!=-1
+    		GROUP BY a.`id`
+    		)tmp
+    		JOIN t_task_message tm ON tm.id = tmp.maxid
+	</select>
+	
+	<update id="deleteMessage" parameterType="long">
+    	update t_task_message set status = 0 
+    	where  id=#{messageId} and user_id=#{userId}
+    </update>
+    
+    <insert id="updateReadTime" parameterType="long">
+    	replace into t_user_message_read (`task_id`, `user_id`,`last_open_time`)
+    	values (#{taskId}, #{userId},now())
+    </insert>
+    
+	<select id="getReadTime" parameterType="long" resultType="String">
+		select `last_open_time`
+		from t_user_message_read 
+		where  task_id=#{taskId} and user_id=#{userId}
+	</select>
+	
+</mapper>
